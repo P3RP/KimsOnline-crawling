@@ -102,3 +102,12 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# exe files
+*.exe
+
+# text files
+*.txt
+
+# Excel files
+*.xlsx
