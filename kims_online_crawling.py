@@ -83,10 +83,61 @@ def get_drug_list(file):
         drug_file = load_workbook(file)
         logger.info("[COMPLETE] Drug File 확인")
         drug_sheet = drug_file.worksheets[0]
-        return drug_sheet.rows
+        temp = 0
+        temp_list = []
+        for drug_row in drug_sheet.rows:
+            if temp == 0:
+                temp += 1
+                continue
+            temp_list.append(drug_row[2].value)
+        return temp_list
+
     except FileNotFoundError:
         logger.error("[ERROR] Drug File 확인 실패")
         exit()
+
+
+# GET DRUG INFO
+def get_drug_info(drug_code):
+    temp_data = []
+
+    # MOVE FOR SEARCHING DRUG
+    driver.find_element_by_xpath('//*[@id="gnb"]/li[1]/a').click()
+    driver.implicitly_wait(3)
+    time.sleep(0.2)
+
+    # SEARCH DRUG
+    driver.find_element_by_xpath('//*[@id="txtKDCode"]').send_keys(drug_code)
+    driver.find_element_by_xpath('//*[@id="contents"]/div/div[6]/a[1]').click()
+    driver.implicitly_wait(3)
+    time.sleep(0.2)
+
+    # SELECT DRUG
+    driver.find_element_by_xpath('//*[@id="tabMarketS"]/ul/li/div[2]/div[1]/a').click()
+    driver.implicitly_wait(3)
+    time.sleep(0.2)
+
+    # SELECT MENU
+    driver.find_element_by_xpath('//*[@id="contents"]/div/div[5]/ul/li[4]').click()
+    driver.implicitly_wait(3)
+    time.sleep(0.2)
+
+    # GET DRUG INFO
+    bs4 = BeautifulSoup(driver.page_source, 'lxml')
+    drug_info = bs4.find('div', id='ctl01_area_mediguide_brief').find_all('div', class_='mt10')
+    print('==================== 1 ======================')
+    print('효능')
+    print(drug_info[0].get_text().strip().split('\n')[0])
+    temp_data.append(drug_info[0].get_text().strip().split('\n')[0])
+    print('==================== 2 ======================')
+    print('복약 지도')
+    for medi_guide in drug_info[1].get_text().strip().split('\n')[0:-1]:
+        print(medi_guide)
+        temp_data.append(medi_guide)
+    print(temp_data)
+    data_list.append(temp_data)
+
+    return temp_data
 
 
 if __name__ == '__main__':
@@ -163,6 +214,9 @@ if __name__ == '__main__':
             temp_data.append(guide)
         print(temp_data)
         data_list.append(temp_data)
+
+        input("asda")
+        exit()
 
     # Quit driver
     driver.quit()
